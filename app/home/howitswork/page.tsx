@@ -153,7 +153,9 @@ export default function AIBookGenerator() {
             ].map((s, i) => (
               <div key={i} className="flex items-center flex-1">
                 <div
-                  ref={(el) => el && (progressStepsRef.current[i] = el)}
+                  ref={(el) => {
+                    if (el) progressStepsRef.current[i] = el;
+                  }}
                   className="progress-step flex flex-col items-center"
                 >
                   <div
@@ -168,7 +170,7 @@ export default function AIBookGenerator() {
 
                 {i < 4 && (
                   <div
-                    ref={(el) => el && (progressLinesRef.current[i] = el)}
+                    ref={(el) => { if (el) progressLinesRef.current[i] = el; }}
                     className={`progress-line flex-1 h-1 mx-2 transition-all ${
                       i < currentStep ? 'bg-green-500' : 'bg-gray-200'
                     }`}
@@ -183,7 +185,7 @@ export default function AIBookGenerator() {
 
             {/* ── STEP 1 – Choose book type ── */}
             <div
-              ref={(el) => el && (stepsRef.current[0] = el)}
+              ref={(el) => { if (el)  stepsRef.current[0] = el}}
               className="step active bg-white rounded-3xl p-8 shadow-lg border border-pink-100"
             >
               <h3 className="text-xl font-semibold text-gray-900 mb-4">Choose book type</h3>
@@ -209,7 +211,7 @@ export default function AIBookGenerator() {
 
             {/* ── STEP 2 – Recipient details ── */}
             <div
-              ref={(el) => el && (stepsRef.current[1] = el)}
+              ref={(el) => {if (el)  stepsRef.current[1] = el}}
               className="step bg-white rounded-3xl p-8 shadow-lg border border-pink-100"
             >
               <h3 className="text-xl font-semibold text-gray-900 mb-4">Recipient details</h3>
@@ -254,7 +256,7 @@ export default function AIBookGenerator() {
 
             {/* ── STEP 3 – Brainstorm Questions ── */}
             <div
-              ref={(el) => el && (stepsRef.current[2] = el)}
+              ref={(el) => {if (el)   stepsRef.current[2] = el}}
               className="step bg-white rounded-3xl p-8 shadow-lg border border-pink-100"
             >
               <h3 className="text-xl font-semibold text-gray-900 mb-4">Brainstorm Questions</h3>
@@ -301,7 +303,7 @@ export default function AIBookGenerator() {
 
             {/* ── STEP 4 – Upload Photos ── */}
             <div
-              ref={(el) => el && (stepsRef.current[3] = el)}
+              ref={(el) =>{ if(el)  stepsRef.current[3] = el}}
               className="step bg-white rounded-3xl p-8 shadow-lg border border-pink-100"
             >
               <h3 className="text-xl font-semibold text-gray-900 mb-4">Upload Photos</h3>
@@ -332,7 +334,7 @@ export default function AIBookGenerator() {
 
             {/* ── STEP 5 – Cover Choice ── */}
             <div
-              ref={(el) => el && (stepsRef.current[4] = el)}
+              ref={(el) => { if(el)  stepsRef.current[4] = el}}
               className="step bg-white rounded-3xl p-8 shadow-lg border border-pink-100"
             >
               <h3 className="text-xl font-semibold text-gray-900 mb-4">Cover Choice</h3>
