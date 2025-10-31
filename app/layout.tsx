@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
-
+const montoSerat =  Montserrat({
+  variable: "--font-montserrat",
+  weight: ["400", "700"],
+  subsets: ["latin"],
+});
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -24,8 +28,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+     <head>
+       {/* <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"/> */}
+    {/* <!-- Font Awesome CSS --> */}
+    {/* <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"></link> */}
+      </head> 
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={` ${montoSerat.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
+      
       >
         {children}
       </body>
