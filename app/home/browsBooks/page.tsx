@@ -14,8 +14,8 @@ function Page() {
     highlightWord="Unique Books"
     description="Funny stories, romantic tales, family memories, pet adventures, and kids' books. Make every gift unique and unforgettable."
     buttons={[
-      { text: 'Start My Book', href: '/browse-books', variant: 'primary', icon: FaShoppingBasket },
-      { text: 'See Examples', href: '/how-it-works', variant: 'outline', icon: undefined },
+      { text: 'Start My Book', href: '/home/authPage', variant: 'primary', icon: FaShoppingBasket },
+      { text: 'See Examples', href: '/home/how-it-works', variant: 'outline', icon: undefined },
     ]}
     bannerText="Unlimited Access to Thousands of Books"
   />

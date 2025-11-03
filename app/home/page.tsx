@@ -196,14 +196,14 @@ export default function Home() {
             {/* Buttons */}
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
               <Link
-                href="/browse-books"
+                href="/home/authPage"
                 className="inline-flex text-sm items-center justify-center gap-2 c1 text-white px-3 py-2 rounded-full font-medium hover:bg-pink-600 transition-all duration-300  transform hover:-translate-y-1"
               >
                 <FaShoppingCart />
                 Start My Book
               </Link>
               <Link
-                href="/examples"
+                href="/home/how-it-works"
                 className="inline-flex text-white text-sm items-center justify-center px-3 py-2 rounded-full border-2 border-none  bg-transparent font-medium c1 hover:text-white transition-all duration-300"
               >
                 See Examples

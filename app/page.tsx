@@ -1,6 +1,7 @@
 // import { redirect } from "next/dist/server/api-utils";
 import Image from "next/image";
 import { redirect } from "next/navigation";
+import "@/lib/mongo";
 
 export default function Home() {
   redirect("/home");

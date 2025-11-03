@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { Check, Upload, ChevronRight, ChevronLeft } from 'lucide-react';
+import Link from 'next/link';
 
 export default function AIBookGenerator() {
   /* -------------------------------------------------
@@ -114,12 +115,12 @@ export default function AIBookGenerator() {
             chapters—fast, easy, and creative.
           </p>
           <div className="primary-btn mt-6">
-            <a
+            <Link
               href="#prompt-box"
               className="inline-block px-8 py-3 bg-gradient-to-r from-[#F38DA0] to-pink-600 text-white rounded-full font-medium hover:from-pink-600 hover:to-pink-700 transition-all shadow-lg"
             >
               Start My Book
-            </a>
+            </Link>
           </div>
         </div>
 

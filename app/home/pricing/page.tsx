@@ -18,13 +18,13 @@ function page() {
       buttons={[
         {
           text: 'Start My Book',
-          href: '/browse-books',
+          href: '/home/authPage',
           variant: 'primary',
           icon: FaShoppingCart,
         },
         {
           text: 'See Examples',
-          href: '/examples',
+          href: '/home/how-it-works',
           variant: 'outline',
           icon: FaEye,
         },

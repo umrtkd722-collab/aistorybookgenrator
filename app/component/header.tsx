@@ -61,7 +61,7 @@ export default function Header() {
             {/* CTA Button */}
             <div className="hidden md:flex">
               <Link
-                href="/browse-books"
+                href="/home/authPage"
                 className="flex items-center gap-2 bg-[#F38DA0] text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-pink-600 transition-all duration-300 shadow-lg hover:shadow-pink-500/30 transform hover:-translate-y-0.5"
               >
                 <FaShoppingCart />
@@ -102,7 +102,7 @@ export default function Header() {
             ))}
             <div className="pt-4">
               <Link
-                href="/browse-books"
+                href="/home/authPage"
                 className="flex items-center justify-center gap-2 bg-[#F38DA0] text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-pink-600 transition-all w-full shadow-md"
                 onClick={() => setMobileMenuOpen(false)}
               >
