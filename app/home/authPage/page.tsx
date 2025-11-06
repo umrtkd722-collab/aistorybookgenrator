@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
-
+import { apiHandler } from '@/lib/api';
+import { useRouter } from 'next/navigation';
 export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -12,16 +13,47 @@ export default function AuthPage() {
     email: '',
     password: '',
   });
-
+const {back} = useRouter()
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log(isSignUp ? 'Sign Up:' : 'Sign In:', form);
-    alert(isSignUp ? 'Account created!' : 'Signed in!');
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  const endpoint = isSignUp ? "/auth/signup" : "/auth/signin";
+
+  try {
+    const res = await apiHandler(
+      {
+        url: endpoint,
+        method: "POST",
+        data: form,
+      },
+      {
+        showSuccess: true,
+        successMessage: isSignUp ? "Account Created!" : "Logged In ✅",
+        showError:true
+        
+      }
+    );
+
+    // store token in cookie (server will set cookie soon)
+    if (res.token) document.cookie = `accessToken=${res.token}; path=/;`;
+
+    if (!isSignUp) {
+      back()
+    }
+
+  } catch(e) {
+    console.log(e)
+  }
+};
+  // const handleSubmit = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   console.log(isSignUp ? 'Sign Up:' : 'Sign In:', form);
+  //   alert(isSignUp ? 'Account created!' : 'Signed in!');
+  // };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import "./globals.css";
 import "@/lib/mongo";
+import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/lib/context/AuthContext";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -37,8 +39,30 @@ export default function RootLayout({
         className={` ${montoSerat.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       
       >
-        {children}
-      </body>
+        <AuthProvider>
+
+  {children}
+  <Toaster
+  toastOptions={{
+    style: {
+      background: "linear-gradient(to right, #F38DA0, #D946EF)",
+      color: "#fff",
+      padding: "14px 18px",
+      fontWeight: 600,
+      borderRadius: "9999px",
+      boxShadow: "0 6px 15px rgba(249, 168, 212, 0.35)",
+      border: "1px solid rgba(255, 182, 193, 0.4)",
+      fontSize: "15px",
+    },
+    
+  }
+  
+}
+  position="top-center"
+  
+/> 
+</AuthProvider>
+</body>
     </html>
   );
 }

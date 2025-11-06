@@ -1,23 +1,53 @@
+// lib/gridf.ts
 import mongoose from "mongoose";
-import Grid from "gridfs-stream";
-import fs from "fs";
-import path from "path";
+import { GridFSBucket } from "mongodb";
 
-let gfs: Grid.Grid;
+let bucket: GridFSBucket;
 
 export async function initGridFS() {
-  if (gfs) return gfs;
-  gfs = Grid(mongoose.connection.db, mongoose.mongo);
-  gfs.collection("uploads");
-  return gfs;
+  if (bucket) return bucket;
+
+  if (mongoose.connection.readyState !== 1) {
+    await mongoose.connect(process.env.MONGODB_URI!);
+  }
+
+  bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db!, {
+    bucketName: "uploads",
+  });
+
+  return bucket;
 }
 
-export async function uploadFile(filePath: string, filename: string) {
-  const gfs = await initGridFS();
-  const writeStream = gfs.createWriteStream({ filename });
-  fs.createReadStream(filePath).pipe(writeStream);
+// Upload file
+export async function uploadFile(filePath: string, filename: string): Promise<string> {
+  const bucket = await initGridFS();
+  const uploadStream = bucket.openUploadStream(filename);
+  const readStream = require("fs").createReadStream(filePath);
+
   return new Promise((resolve, reject) => {
-    writeStream.on("close", (file: any) => resolve(file._id));
-    writeStream.on("error", (err: any) => reject(err));
+    readStream
+      .pipe(uploadStream)
+      .on("error", reject)
+      .on("finish", () => resolve(uploadStream.id.toString()));
   });
+}
+
+// Download file as Buffer
+export async function downloadFromGridFS(fileId: string): Promise<Buffer> {
+  const bucket = await initGridFS();
+  const downloadStream = bucket.openDownloadStream(new mongoose.Types.ObjectId(fileId));
+
+  const chunks: Buffer[] = [];
+  return new Promise((resolve, reject) => {
+    downloadStream
+      .on("data", (chunk) => chunks.push(chunk))
+      .on("end", () => resolve(Buffer.concat(chunks)))
+      .on("error", reject);
+  });
+}
+
+// Delete file (optional)
+export async function deleteFile(fileId: string): Promise<void> {
+  const bucket = await initGridFS();
+  await bucket.delete(new mongoose.Types.ObjectId(fileId));
 }

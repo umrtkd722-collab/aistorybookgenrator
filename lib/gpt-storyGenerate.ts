@@ -9,6 +9,7 @@ export async function generateStory(prompt: string, maxTokens = 500) {
         { role: "user", content: prompt },
       ],
       max_tokens: maxTokens,
+      temperature: 0.8,
     });
 
     const storyText = response.choices?.[0]?.message?.content ?? "";

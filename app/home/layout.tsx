@@ -3,6 +3,7 @@ import "../../app/globals.css"; // global CSS import
 import Header from "../component/header";
 import Footer from "../component/footer";
 
+
 export const metadata = {
   title: "My Next.js Website",
   description: "This is my awesome Next.js website",
@@ -25,7 +26,10 @@ export default function Layout({ children }: LayoutProps) {
     
 
         {/* Main content */}
-        <main className="" >{children}</main>
+        <main className="" >{children}
+
+          
+        </main>
 
         {/* Footer */}
 <Footer/>        
