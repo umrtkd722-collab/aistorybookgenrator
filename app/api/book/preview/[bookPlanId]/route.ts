@@ -44,7 +44,7 @@ export async function GET(
 
     const downloadStream = bucket.openDownloadStream(fileId);
 
-    return new NextResponse(downloadStream, {
+    return new NextResponse(downloadStream as any, {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `inline; filename="${bookPlan.title}.pdf"`,

@@ -5,6 +5,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { apiHandler } from '@/lib/api'; // jo tumhara apiHandler hai
 import { User } from '../type';
 import Cookies from 'js-cookie';
+import { redirect, useRouter } from 'next/navigation';
 
 
 interface AuthContextType {
@@ -19,7 +20,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-
+ const router = useRouter();
   const fetchUser = async () => {
     try {
       setLoading(true);
@@ -42,11 +43,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     }
   };
-const logout = () => {
-    Cookies.remove('accessToken');
+const logout = async () => {
+ 
+
+  try {
+    await fetch("/api/auth/signout", {
+      method: "POST",
+    });
+
     setUser(null);
-    window.location.href = '/home/authPage'; // redirect
-  };
+    router.push("/home/authPage"); // ✅ redirect from client side
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+};
   useEffect(() => {
     fetchUser();
   }, []);

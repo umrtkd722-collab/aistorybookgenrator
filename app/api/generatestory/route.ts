@@ -70,53 +70,53 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Build Prompt
-    const prompt = `
-You are a world-class children's storyteller with a gift for weaving **heartfelt, imaginative, and emotionally rich** tales. Write a **beautiful, personalized story** for **${name}** (${age} years old) that feels like it was written just for them — full of wonder, warmth, and magic.
+      const prompt = `
+      You are a world-class children's storyteller with a gift for weaving **heartfelt, imaginative, and emotionally rich** tales. Write a **beautiful, personalized story** for **${name}** (${age} years old) that feels like it was written just for them — full of wonder, warmth, and magic.
 
----
+      ---
 
-**Recipient Details**  
-- Name: ${name}  
-- Age: ${age}  
-- Relationship to you: ${relationship}  
-- Occasion: ${occasion || 'a special surprise'}  
+      **Recipient Details**  
+      - Name: ${name}  
+      - Age: ${age}  
+      - Relationship to you: ${relationship}  
+      - Occasion: ${occasion || 'a special surprise'}  
 
-**Must Include (weave naturally into the story)**  
-- A **hilarious memory**: "${funnyMemory}"  
-- Personality traits: ${personality}  
-- Favorite things: ${favourite}  
-- Catchphrase: "${catchphrase}"  
-- Superpower: **${superpower}**  
-- A personal story/event: "${userStory}"  
-- Extra quirks: ${extra}  
+      **Must Include (weave naturally into the story)**  
+      - A **hilarious memory**: "${funnyMemory}"  
+      - Personality traits: ${personality}  
+      - Favorite things: ${favourite}  
+      - Catchphrase: "${catchphrase}"  
+      - Superpower: **${superpower}**  
+      - A personal story/event: "${userStory}"  
+      - Extra quirks: ${extra}  
 
-**Core Idea to Build On**  
-> "${bookIdea}"
+      **Core Idea to Build On**  
+      > "${bookIdea}"
 
----
+      ---
 
-**Style & Tone**  
-- **${tone || 'warm, playful, and deeply emotional'}**  
-- **Engaging, cinematic, and vivid** — paint scenes like a movie  
-- **400–800 words**  
-- **Age-appropriate language** (fun, clear, magical)  
-- **End with a tender, loving message** from the giver to ${name}  
+      **Style & Tone**  
+      - **${tone || 'warm, playful, and deeply emotional'}**  
+      - **Engaging, cinematic, and vivid** — paint scenes like a movie  
+      - **400–800 words**  
+      - **Age-appropriate language** (fun, clear, magical)  
+      - **End with a tender, loving message** from the giver to ${name}  
 
----
+      ---
 
-**Creative Freedom**  
-- Add **whimsical characters, talking animals, magical worlds, or time travel** if it fits  
-- Let **${name}'s superpower** spark the adventure  
-- Turn the **funny memory** into a legendary moment in the tale  
-- Make **${catchphrase}** a heroic or heartwarming refrain  
+      **Creative Freedom**  
+      - Add **whimsical characters, talking animals, magical worlds, or time travel** if it fits  
+      - Let **${name}'s superpower** spark the adventure  
+      - Turn the **funny memory** into a legendary moment in the tale  
+      - Make **${catchphrase}** a heroic or heartwarming refrain  
 
----
+      ---
 
-**Final Touch**  
-Close with a **personal, tear-jerking message** from the storyteller to ${name}, mentioning love, pride, and forever friendship/family bond.
+      **Final Touch**  
+      Close with a **personal, tear-jerking message** from the storyteller to ${name}, mentioning love, pride, and forever friendship/family bond.
 
-Begin now.
-`.trim();
+      Begin now.
+  `.trim();
 
     // 2. Generate Story
     const completion = await openai.chat.completions.create({
@@ -182,8 +182,8 @@ console.log("buffer",imageBuffers)
 
     // 8. Success
     return NextResponse.json({
-      storyId: storyDoc._id.toString(),
-      bookPlanId: bookPlan._id.toString(),
+      storyId: storyDoc.id.toString(),
+      bookPlanId: bookPlan.id.toString(),
       message: "Book generated and saved!",
       previewUrl: `/api/pdf/view/${pdfFileId}`,
     });

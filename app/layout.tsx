@@ -4,6 +4,7 @@ import "./globals.css";
 import "@/lib/mongo";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/lib/context/AuthContext";
+import { DataProvider } from "@/lib/context/DataContext";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -39,6 +40,8 @@ export default function RootLayout({
         className={` ${montoSerat.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       
       >
+        <DataProvider>
+
         <AuthProvider>
 
   {children}
@@ -62,6 +65,7 @@ export default function RootLayout({
   
 /> 
 </AuthProvider>
+        </DataProvider>
 </body>
     </html>
   );

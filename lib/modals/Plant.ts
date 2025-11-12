@@ -12,7 +12,7 @@ export interface IPlan extends Document {
   deliveryDays: string;
   addOns: string[];
   createdAt: Date;
-  updateAt:Date
+
 }
 
 const planSchema = new Schema<IPlan>({
@@ -27,7 +27,7 @@ const planSchema = new Schema<IPlan>({
   deliveryDays: { type: String, default: "1-3" }, // UK delivery
   addOns: { type: [String], default: [] }, // ["premium cover", "AI artwork", etc.]
   createdAt: { type: Date, default: Date.now },
-  updatedAt : {type:Date, default:Date.now}
+
 });
 
 export const Plan = (models.Plan as mongoose.Model<IPlan>) || model<IPlan>("Plan", planSchema);

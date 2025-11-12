@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { apiHandler } from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/context/AuthContext';
 export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -17,7 +18,7 @@ const {back} = useRouter()
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-
+const {refetch} = useAuth()
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   
@@ -37,7 +38,9 @@ const {back} = useRouter()
         
       }
     );
-
+  if(endpoint === "/auth/signin"){
+    await refetch()
+  }
     // store token in cookie (server will set cookie soon)
     if (res.token) document.cookie = `accessToken=${res.token}; path=/;`;
 
