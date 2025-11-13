@@ -11,7 +11,7 @@ export async function GET(
   try {
     await connectToMongo();
 
-    const fileId = params.fileId;
+    const { fileId } = await params; // ← await params → phir destructure
     console.log(fileId , "fileId")
     if (!mongoose.Types.ObjectId.isValid(fileId)) {
       return new NextResponse("Invalid file ID", { status: 400 });
@@ -23,13 +23,13 @@ export async function GET(
     }
 
     const bucket = new mongoose.mongo.GridFSBucket(db, {
-      bucketName: "fs", // YE CHECK KAR — fs ya uploads?
+      bucketName: "uploads", // YE CHECK KAR — fs ya uploads?
     });
 
     const objectId = new mongoose.Types.ObjectId(fileId);
 
     // Check if file exists
-    const file = await db.collection("fs.files").findOne({ _id: objectId });
+    const file = await db.collection("uploads.files").findOne({ _id: objectId });
     if (!file) {
       return new NextResponse("Image not found", { status: 404 });
     }

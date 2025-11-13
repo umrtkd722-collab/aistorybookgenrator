@@ -1,11 +1,8 @@
-// app/api/book/generate/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { Story } from "@/lib/modals/Story";
 import { BookPlan } from "@/lib/modals/Book";
 import { getCurrentUser } from "@/lib/auth";
-
 import { initGridFS, uploadFile, downloadFromGridFS } from "@/lib/gridf";
 import fs from "fs";
 import path from "path";
@@ -33,21 +30,13 @@ interface GenerateBookRequest {
   extra: string;
   coverStyle: string;
   title: string;
-  imageFileIds: string[]; // ← Changed from imageUrls
-}
-
-interface GenerateBookResponse {
-  storyId: string;
-  bookPlanId: string;
-  message: string;
-  previewUrl?: string;
+  imageFileIds: string[];
 }
 
 export async function POST(req: NextRequest) {
   let tempFilePath: string | null = null;
 
   try {
-   
     await initGridFS();
 
     const user = await getCurrentUser(req);
@@ -69,127 +58,165 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Build Prompt
-      const prompt = `
-      You are a world-class children's storyteller with a gift for weaving **heartfelt, imaginative, and emotionally rich** tales. Write a **beautiful, personalized story** for **${name}** (${age} years old) that feels like it was written just for them — full of wonder, warmth, and magic.
+    // 🔹 STEP 1: Build prompt for story
+  const storyPrompt = `
+You are a world-class children's book author. Write a long, detailed, emotional, age-appropriate storybook for a printed edition of about 250 pages.
 
-      ---
+Recipient: ${name}
+Age: ${age}
+Relationship: ${relationship || "someone special"}
+Occasion: ${occasion || "a loving surprise"}
 
-      **Recipient Details**  
-      - Name: ${name}  
-      - Age: ${age}  
-      - Relationship to you: ${relationship}  
-      - Occasion: ${occasion || 'a special surprise'}  
+Must naturally include:
+- Funny memory: "${funnyMemory}"
+- Personality traits: ${personality}
+- Favorite things: ${favourite}
+- Catchphrase: "${catchphrase}"
+- Superpower: "${superpower}"
+- Personal moment: "${userStory}"
+- Extra detail: ${extra}
 
-      **Must Include (weave naturally into the story)**  
-      - A **hilarious memory**: "${funnyMemory}"  
-      - Personality traits: ${personality}  
-      - Favorite things: ${favourite}  
-      - Catchphrase: "${catchphrase}"  
-      - Superpower: **${superpower}**  
-      - A personal story/event: "${userStory}"  
-      - Extra quirks: ${extra}  
+CORE REQUIREMENT:
+- Generate a story long enough to fill **at least 200–250 pages** when printed (Lulu 6×9 format).
+- Total word count target: **28,000 to 35,000 words**.
+- Chapters: **25 to 35 long chapters**.
+- Each chapter: **700–1200 words**, divided into **many paragraphs**, perfect for page-by-page layout.
+- Story tone: highly emotional, magical, warm, full of love and adventure.
+- Use simple, poetic language based on child's age.
+- Catchphrase should appear naturally multiple times.
+- The last chapter must end with a heartfelt, tear-jerking personal message from the giver to ${name}.
 
-      **Core Idea to Build On**  
-      > "${bookIdea}"
+FORMAT STRICTLY LIKE THIS:
 
-      ---
+Chapter 1: Title
+[8–15 paragraphs]
 
-      **Style & Tone**  
-      - **${tone || 'warm, playful, and deeply emotional'}**  
-      - **Engaging, cinematic, and vivid** — paint scenes like a movie  
-      - **400–800 words**  
-      - **Age-appropriate language** (fun, clear, magical)  
-      - **End with a tender, loving message** from the giver to ${name}  
+Chapter 2: Title
+[8–15 paragraphs]
 
-      ---
+...continue until final chapter
 
-      **Creative Freedom**  
-      - Add **whimsical characters, talking animals, magical worlds, or time travel** if it fits  
-      - Let **${name}'s superpower** spark the adventure  
-      - Turn the **funny memory** into a legendary moment in the tale  
-      - Make **${catchphrase}** a heroic or heartwarming refrain  
+Begin now and generate the full long-format story without summarizing.`.trim();
 
-      ---
-
-      **Final Touch**  
-      Close with a **personal, tear-jerking message** from the storyteller to ${name}, mentioning love, pride, and forever friendship/family bond.
-
-      Begin now.
-  `.trim();
-
-    // 2. Generate Story
-    const completion = await openai.chat.completions.create({
+    // 🔹 STEP 2: Generate Story
+    const storyResponse = await openai.chat.completions.create({
       model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      
-      temperature: 0,
+      messages: [{ role: "user", content: storyPrompt }],
+      temperature: 0.8,
     });
 
-    const storyText = completion.choices[0].message.content?.trim();
+    const storyText = storyResponse.choices[0].message.content?.trim();
     if (!storyText) {
       return NextResponse.json({ error: "Failed to generate story." }, { status: 500 });
     }
-console.log(imageFileIds , )
-    // 3. Download Images from GridFS
+
+    // 🔹 STEP 3: Generate Design Theme for PDF
+    const designPrompt = `
+    You are a creative children's book designer. Based on this story and its details, 
+    generate a JSON theme describing the perfect visual style for the storybook.
+
+    Title: "${title}"
+    Book Idea: "${bookIdea}"
+    Tone: "${tone}"
+    Story Summary: "${storyText.substring(0, 500)}..."
+
+    Respond ONLY in JSON like this:
+    {
+      "colorPalette": {
+        "primary": "#HEX",
+        "secondary": "#HEX",
+        "background": "#HEX",
+        "accent": "#HEX"
+      },
+      "fontStyle": "Playful | Classic | Modern | Handwritten | Comic-style",
+      "pageLayout": "Full-page illustrations | Split text and image | Text with borders",
+      "illustrationMood": "Dreamy | Magical | Bright | Calm | Whimsical",
+      "specialEffects": "Watercolor texture, sparkles, gradients, or simple paper look"
+    }
+    `;
+
+    const designResponse = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: designPrompt }],
+      temperature: 0.7,
+    });
+
+    let designTheme: any = {};
+    try {
+      const raw = designResponse.choices[0].message.content?.trim();
+      const jsonMatch = raw?.match(/\{[\s\S]*\}/);
+      console.log(raw)
+     if (jsonMatch) {
+     designTheme = JSON.parse(jsonMatch[0]);
+     } else {
+      console.warn("⚠️ No valid JSON block found in design theme output:", raw);
+    }
+    } catch {
+      designTheme = {};
+    }
+
+    console.log("🎨 Generated Design Theme:", designTheme);
+
+    // 🔹 STEP 4: Download Images from GridFS
     const imageBuffers: Buffer[] = [];
     for (const fileId of imageFileIds) {
       try {
         const buffer = await downloadFromGridFS(fileId);
-        imageBuffers.push(buffer);
+        console.log(buffer)
+                imageBuffers.push(buffer);
       } catch (err) {
         console.warn(`Failed to load image ${fileId}:`, err);
       }
     }
-console.log("buffer",imageBuffers)
-    // 4. Generate PDF with images from GridFS
+
+    // 🔹 STEP 5: Generate PDF with AI-styled appearance
     const pdfBuffer = await generatePDFWithImages({
       title,
       storyText,
-      coverStyle: coverStyle || "classic",
-      imageBuffers, // ← Pass buffers
+      
+      imageBuffers,
       recipientName: name,
+      
     });
 
-    // 5. Save PDF to temp + upload
+    // 🔹 STEP 6: Save PDF and upload
     const filename = `${title.replace(/[^a-zA-Z0-9]/g, "_")}_${Date.now()}.pdf`;
     tempFilePath = path.join(os.tmpdir(), filename);
     fs.writeFileSync(tempFilePath, pdfBuffer);
 
     const pdfFileId = await uploadFile(tempFilePath, filename);
 
-    // 6. Save Story
+    // 🔹 STEP 7: Save story + book plan in DB
     const storyDoc = await Story.create({
       userId: user._id,
       planId: user.plan || null,
       title,
-      prompt,
+      prompt: storyPrompt,
       storyText,
       coverUrl: imageFileIds[0] ? `/api/gridfs/image/${imageFileIds[0]}` : undefined,
       pdfFileId,
     });
 
-    // 7. Create BookPlan
     const bookPlan = await BookPlan.create({
       userId: user._id,
       planId: user.plan || null,
       title,
       description: bookIdea,
-      type: occasion.toLowerCase().includes("gift") ? "gift" : "relationship",
+      type: occasion?.toLowerCase()?.includes("gift") ? "gift" : "relationship",
       storyIds: [storyDoc._id],
       coverUrl: imageFileIds[0] ? `/api/gridfs/image/${imageFileIds[0]}` : undefined,
     });
 
-    // 8. Success
+    // 🔹 STEP 8: Success Response
     return NextResponse.json({
       storyId: storyDoc.id.toString(),
       bookPlanId: bookPlan.id.toString(),
-      message: "Book generated and saved!",
+      message: "Book generated successfully with custom design!",
       previewUrl: `/api/pdf/view/${pdfFileId}`,
     });
 
   } catch (error: any) {
-    console.error("Book generation error:", error);
+    console.error("❌ Book generation error:", error);
     return NextResponse.json(
       { error: error.message || "Something went wrong." },
       { status: 500 }
