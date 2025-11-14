@@ -23,6 +23,10 @@ export default function Dashboard() {
       const res = await apiHandler<{ orders: any[] }>({
         url: '/api/order/list',
         method: 'GET',
+        
+      }, {
+        showSuccess:false,
+        showError:false
       });
       setOrders(res.orders);
     } catch (err) {
@@ -49,6 +53,9 @@ export default function Dashboard() {
         url: '/api/order/create',
         method: 'POST',
         data: { bookPlanId: bookId, shippingAddress: address },
+      },{
+        showError:false,
+        showSuccess:false
       });
       refetch();
     } catch (err) {
