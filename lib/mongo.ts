@@ -24,7 +24,7 @@ export async function connectToMongo() {
     const opts = {
       bufferCommands: false,
     };
-
+console.log(MONGO_URI , "MONGO_URI")
     cached.promise = mongoose.connect(MONGO_URI!, opts).then((mongoose) => {
       console.log("MongoDB connected");
       return mongoose;
