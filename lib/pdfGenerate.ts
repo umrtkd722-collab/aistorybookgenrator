@@ -615,27 +615,33 @@ export async function generatePDFWithImages(opts: PDFOptions): Promise<Uint8Arra
   const PAGE_WIDTH = 621;
   const PAGE_HEIGHT = 621;
   const BLEED = 9;
-  const MARGIN = 60; // Safe margin increased for breathing room
+  const MARGIN = 60;
   const SAFE_LEFT = BLEED + MARGIN;
   const SAFE_TOP = PAGE_HEIGHT - BLEED - MARGIN;
   const SAFE_WIDTH = PAGE_WIDTH - 2 * (BLEED + MARGIN);
-  const LINE_HEIGHT = 38;        // Fixed line height
-  const PARAGRAPH_SPACING = 40;  // After each paragraph
-  const IMAGE_GAP = 60;          // After image
 
+  // PERFECT SPACING (FINAL)
+  const FONT_SIZE = 17;           // Chota + readable
+  const LINE_HEIGHT = 28;         // Breathable gap
+  const PARAGRAPH_SPACING = 44;   // Paragraphs alag dikhein
+  const IMAGE_GAP = 70;           // Image ke baad thoda zyada space
+
+  // PROFESSIONAL COLORS
   const colors = {
-    bg: rgb(1, 0.98, 0.95),
-    chapterNum: rgb(0.85, 0.35, 0.55),
-    chapterTitle: rgb(0.23, 0.15, 0.38),
-    text: rgb(0.15, 0.15, 0.15),
+    bg: rgb(0.98, 0.97, 0.93),
+    chapterNum: rgb(0.15, 0.45, 0.55),
+    chapterTitle: rgb(0.1, 0.15, 0.35),
+    text: rgb(0.2, 0.2, 0.2),
+    pageNumber: rgb(0.5, 0.5, 0.5),
   };
 
   const fontDir = path.join(process.cwd(), "public", "fonts");
   const titleFont = await pdfDoc.embedFont(fs.readFileSync(path.join(fontDir, "PlayfairDisplay-Italic.ttf")));
-  const bodyFont = await pdfDoc.embedFont(fs.readFileSync(path.join(fontDir, "OpenSans-Regular.ttf")));
+  const bodyFont = await pdfDoc.embedFont(fs.readFileSync(path.join(fontDir, "PlayfairDisplay-Italic.ttf")));
 
   let y = SAFE_TOP;
   let page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  let pageCount = 1;
 
   const fillBg = (p: any) => {
     p.drawRectangle({ x: 0, y: 0, width: PAGE_WIDTH, height: PAGE_HEIGHT, color: colors.bg });
@@ -656,17 +662,17 @@ export async function generatePDFWithImages(opts: PDFOptions): Promise<Uint8Arra
   }
 
   const cleanTitle = title.replace(/[\*\#\-\_]/g, "").trim();
-  const titleLines = wrapText(cleanTitle, titleFont, 52, SAFE_WIDTH);
-  y = PAGE_HEIGHT / 2 + titleLines.length * 30;
+  const titleLines = wrapText(cleanTitle, titleFont, 50, SAFE_WIDTH);
+  y = PAGE_HEIGHT / 2 + titleLines.length * 32;
   for (const line of titleLines) {
-    const w = titleFont.widthOfTextAtSize(line, 52);
-    page.drawText(line, { x: (PAGE_WIDTH - w) / 2, y, size: 52, font: titleFont, color: rgb(1,1,1) });
-    y -= 70;
+    const w = titleFont.widthOfTextAtSize(line, 50);
+    page.drawText(line, { x: (PAGE_WIDTH - w) / 2, y, size: 50, font: titleFont, color: rgb(1,1,1) });
+    y -= 68;
   }
   page.drawText(`For ${recipientName}`, {
     x: SAFE_LEFT,
     y: y - 70,
-    size: 32,
+    size: 30,
     font: bodyFont,
     color: rgb(1,1,1)
   });
@@ -698,62 +704,81 @@ export async function generatePDFWithImages(opts: PDFOptions): Promise<Uint8Arra
     page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
     fillBg(page);
     y = SAFE_TOP;
+    pageCount++;
 
-    // CHAPTER NUMBER - CENTER
+    // PAGE NUMBER
+    if (pageCount > 1) {
+      page.drawText(`${pageCount}`, {
+        x: PAGE_WIDTH / 2 - 15,
+        y: BLEED + 22,
+        size: 11,
+        font: bodyFont,
+        color: colors.pageNumber
+      });
+    }
+
+    // CHAPTER NUMBER
     const chapNumText = `Chapter ${chap.number}`;
-    const numWidth = titleFont.widthOfTextAtSize(chapNumText, 48);
+    const numWidth = titleFont.widthOfTextAtSize(chapNumText, 46);
     page.drawText(chapNumText, {
       x: (PAGE_WIDTH - numWidth) / 2,
-      y: y - 30,
-      size: 48,
+      y: y - 25,
+      size: 46,
       font: titleFont,
       color: colors.chapterNum
     });
-    y -= 100;
+    y -= 96;
 
-    // CHAPTER TITLE - CENTER
-    const titleLines = wrapText(chap.title, titleFont, 40, SAFE_WIDTH);
+    // CHAPTER TITLE
+    const titleLines = wrapText(chap.title, titleFont, 38, SAFE_WIDTH);
     for (const line of titleLines) {
-      const w = titleFont.widthOfTextAtSize(line, 40);
+      const w = titleFont.widthOfTextAtSize(line, 38);
       page.drawText(line, {
         x: (PAGE_WIDTH - w) / 2,
         y,
-        size: 40,
+        size: 38,
         font: titleFont,
         color: colors.chapterTitle
       });
-      y -= 62;
+      y -= 58;
     }
-    y -= 70; // Space before content starts
+    y -= 70;
 
-    // PARAGRAPHS - NO OVERLAP GUARANTEED
+    // PARAGRAPHS - BREATHABLE + CLEAN
     const paragraphs = chap.content.split("\n\n").map(p => p.trim()).filter(Boolean);
     for (const para of paragraphs) {
       const cleanPara = para.replace(/[\*\#\-\_]/g, "").trim();
       if (!cleanPara) continue;
 
-      const lines = wrapText(cleanPara, bodyFont, 18, SAFE_WIDTH);
-     const requiredHeight = LINE_HEIGHT;
+      const lines = wrapText(cleanPara, bodyFont, FONT_SIZE, SAFE_WIDTH);
+
       for (const line of lines) {
-  // Check if NEXT line has space
-  if (y - requiredHeight < BLEED + MARGIN + 40) {
-    page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-    fillBg(page);
-    y = SAFE_TOP;
-  }
+        if (y - LINE_HEIGHT < BLEED + MARGIN + 70) {
+          page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+          fillBg(page);
+          pageCount++;
+          page.drawText(`${pageCount}`, {
+            x: PAGE_WIDTH / 2 - 15,
+            y: BLEED + 22,
+            size: 11,
+            font: bodyFont,
+            color: colors.pageNumber
+          });
+          y = SAFE_TOP;
+        }
 
-  page.drawText(line, {
-    x: SAFE_LEFT,
-    y,
-    size: 18,
-    font: bodyFont,
-    color: colors.text
-  });
+        page.drawText(line, {
+          x: SAFE_LEFT,
+          y: y,
+          size: FONT_SIZE,
+          font: bodyFont,
+          color: colors.text
+        });
 
-  y -= requiredHeight;
-}
+        y -= LINE_HEIGHT;
+      }
 
-      y -= PARAGRAPH_SPACING; // Gap between paragraphs
+      y -= PARAGRAPH_SPACING;
     }
 
     // IMAGE AFTER CHAPTER
@@ -764,14 +789,22 @@ export async function generatePDFWithImages(opts: PDFOptions): Promise<Uint8Arra
           ? await pdfDoc.embedPng(buffer)
           : await pdfDoc.embedJpg(buffer);
 
-        const maxHeight = 320;
+        const maxHeight = 330;
         const scale = Math.min(SAFE_WIDTH / img.width, maxHeight / img.height);
         const imgWidth = img.width * scale;
         const imgHeight = img.height * scale;
 
-        if (y < imgHeight + 120) {
+        if (y < imgHeight + 130) {
           page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
           fillBg(page);
+          pageCount++;
+          page.drawText(`${pageCount}`, {
+            x: PAGE_WIDTH / 2 - 15,
+            y: BLEED + 22,
+            size: 11,
+            font: bodyFont,
+            color: colors.pageNumber
+          });
           y = SAFE_TOP;
         }
 
@@ -793,17 +826,26 @@ export async function generatePDFWithImages(opts: PDFOptions): Promise<Uint8Arra
   // THE END PAGE
   page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
   fillBg(page);
+  pageCount++;
+  page.drawText(`${pageCount}`, {
+    x: PAGE_WIDTH / 2 - 15,
+    y: BLEED + 22,
+    size: 11,
+    font: bodyFont,
+    color: colors.pageNumber
+  });
+
   page.drawText("The End", {
     x: SAFE_LEFT,
     y: PAGE_HEIGHT / 2 + 80,
-    size: 82,
+    size: 78,
     font: titleFont,
     color: colors.chapterNum
   });
   page.drawText("With all my love forever", {
     x: SAFE_LEFT,
-    y: PAGE_HEIGHT / 2 - 20,
-    size: 32,
+    y: PAGE_HEIGHT / 2 - 25,
+    size: 30,
     font: bodyFont,
     color: rgb(0.3, 0.3, 0.3)
   });
@@ -811,14 +853,15 @@ export async function generatePDFWithImages(opts: PDFOptions): Promise<Uint8Arra
   return await pdfDoc.save();
 }
 
-// PERFECT WRAP TEXT - NO OVERFLOW
+// WRAP TEXT
 function wrapText(text: string, font: any, size: number, maxWidth: number): string[] {
-  const words = text.split(" ");
+  if (!text) return [];
+  const words = text.split(/\s+/);
   const lines: string[] = [];
   let currentLine = "";
 
   for (const word of words) {
-    const testLine = currentLine + (currentLine ? " " : "") + word;
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
     const width = font.widthOfTextAtSize(testLine, size);
 
     if (width > maxWidth && currentLine) {
