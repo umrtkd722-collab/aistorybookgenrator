@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Base URL
-    const baseUrl = "http://localhost:3000".replace(/\/+$/, "");
+    const baseUrl =  process.env.BASE_URL || "http://localhost:3000".replace(/\/+$/, "");
 
     // Fetch BookPlans with populated stories
     const bookPlans = await BookPlan.find({ userId: user._id })
