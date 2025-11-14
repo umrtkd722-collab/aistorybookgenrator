@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User } from "@/lib/modals/Users";
-// import connectMongo from "@/lib/mongo"; // uncomment if needed
+import { connectToMongo } from "@/lib/mongo";
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
 
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-
+    await connectToMongo()
     const user = await User.findOne({ email });
     if (!user) {
       return NextResponse.json(
