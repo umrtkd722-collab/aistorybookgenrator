@@ -9,8 +9,8 @@ import "@/lib/modals/Story";
 import "@/lib/modals/Order";
 // ==============================
 
-const MONGO_URI = process.env.MONGO_URI;
-if (!MONGO_URI) throw new Error("Please define MONGO_URI in .env");
+const MONGODB_URI = process.env.MONGODB_URI;
+if (!MONGODB_URI) throw new Error("Please define MONGODB_URI in .env");
 
 let cached = (global as any).mongoose;
 if (!cached) {
@@ -28,9 +28,9 @@ export async function connectToMongo() {
       serverSelectionTimeoutMS: 30000, // 30s timeout
     };
 
-    console.log(MONGO_URI, "MONGO_URI");
+    console.log(MONGODB_URI, "MONGODB_URI");
 
-    cached.promise = mongoose.connect(MONGO_URI!, opts).then((mongoose) => {
+    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
       console.log("MongoDB connected");
       return mongoose;
     });
