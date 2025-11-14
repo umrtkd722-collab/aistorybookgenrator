@@ -31,7 +31,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
 {
     successMessage:"Welcome back",
-    
+    showError:false,
+    showSuccess:true
     
 }    
     );
