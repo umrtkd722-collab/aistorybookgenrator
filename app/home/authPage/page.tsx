@@ -40,6 +40,7 @@ const {refetch} = useAuth()
     );
   if(endpoint === "/auth/signin"){
     await refetch()
+    setIsSignUp(false)
   }
     // store token in cookie (server will set cookie soon)
     if (res.token) document.cookie = `accessToken=${res.token}; path=/;`;
