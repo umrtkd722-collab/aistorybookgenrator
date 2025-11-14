@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   const token = (await cookies()).get('accessToken')?.value;
 
     // const token = authHeader?.replace("Bearer ", "");
-
+    await connectToMongo()
     if (!token) {
       return NextResponse.json(
         { success: false, message: "No token provided" },
