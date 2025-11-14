@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 import "@/lib/modals/Users";
 import "@/lib/modals/Plant";
 import "@/lib/modals/Book";
-import "@/lib/modals/Story";     // YE ZAROORI HAI
+import "@/lib/modals/Story";  
 import "@/lib/modals/Order";
 // ==============================
 
@@ -23,8 +23,13 @@ export async function connectToMongo() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 30000, // 30s timeout
     };
-console.log(MONGO_URI , "MONGO_URI")
+
+    console.log(MONGO_URI, "MONGO_URI");
+
     cached.promise = mongoose.connect(MONGO_URI!, opts).then((mongoose) => {
       console.log("MongoDB connected");
       return mongoose;
