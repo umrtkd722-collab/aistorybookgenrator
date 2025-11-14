@@ -13,6 +13,9 @@ class DataService {
     const res = await apiHandler<{ books: IBookPlan[] }>({
       url: '/book',
       method: 'GET',
+    },{
+      showError:false,
+      showSuccess:false
     });
     return res.books;
   }
