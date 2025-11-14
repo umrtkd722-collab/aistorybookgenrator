@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { User } from "@/lib/modals/Users";
 import { Plan } from "@/lib/modals/Plant";
-
+import { connectToMongo } from "@/lib/mongo";
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,8 +16,8 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-
-    const existingUser = await User.findOne({ email });
+    await connectToMongo()
+     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
         { success: false, error: "Email already registered" },
