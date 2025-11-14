@@ -3,18 +3,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 
 import { BookPlan } from "@/lib/modals/Book";
-
+interface RouteContext {
+  params: Promise<{ id: string }>;
+}
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
+  
 ) {
   try {
 
     const user = await getCurrentUser(req);
     
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    
-    const { id } = await params;
+    const params = await context.params
+    const { id } =  params;
     
     const { title, description } = await req.json();
     
@@ -34,13 +37,15 @@ export async function PATCH(
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
+  
 ) {
   try {
  
     const user = await getCurrentUser(req);
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-const { id } = await params;
+      const params = await context.params
+    const { id } = params;
     const bookPlan = await BookPlan.findOne({ _id: id, userId: user._id })
       .populate("storyIds")
       .lean();

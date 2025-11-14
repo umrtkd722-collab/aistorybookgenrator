@@ -3,15 +3,17 @@ import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { connectToMongo } from "@/lib/mongo";
 export const dynamic = "force-dynamic";
-
+interface RouteContext {
+  params: Promise<{ fileId: string }>;
+}
 export async function GET(
   req: NextRequest,
-  { params }: { params: { fileId: string } }
+  context: RouteContext
 ) {
   try {
     await connectToMongo();
-
-    const { fileId } = await params; // ← await params → phir destructure
+    const params = await context.params
+    const { fileId } =  params; // ← await params → phir destructure
     console.log(fileId , "fileId")
     if (!mongoose.Types.ObjectId.isValid(fileId)) {
       return new NextResponse("Invalid file ID", { status: 400 });

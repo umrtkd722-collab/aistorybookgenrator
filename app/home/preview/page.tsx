@@ -1,6 +1,9 @@
+"use client"
 // /home/preview/page.tsx
-'use client';
+
+import { BookPreviewIframe } from '@/components/BookPreview';
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
 export default function PreviewPage() {
   const searchParams = useSearchParams();
@@ -8,13 +11,13 @@ export default function PreviewPage() {
 
   if (!bookPlanId) return <p>Invalid book</p>;
 
+
   return (
     <div className="w-full h-screen">
-      <iframe
-        src={`/api/book/preview/${bookPlanId}`}
-        className="w-full h-full border-0"
-        title="Book Preview"
-      />
+      <Suspense fallback={<p>Loading preview...</p>}>
+        <BookPreviewIframe bookPlanId={bookPlanId} />
+      </Suspense>
     </div>
   );
 }
+  

@@ -5,14 +5,16 @@ import { BookPlan } from "@/lib/modals/Book";
 import { Story } from "@/lib/modals/Story";
 import { initGridFS } from "@/lib/gridf";
 import mongoose from "mongoose";
-
+interface RouteContext {
+  params: Promise<{ bookPlanId: string }>;
+}
 export async function GET(
-  req: NextRequest,
-  { params }: { params: { bookPlanId: string } }
+    req: NextRequest,
+   context: RouteContext
 ) {
   try {
-
-    const { bookPlanId } = await params;
+    const params = await context.params
+    const { bookPlanId } =  params;
  
     if (!mongoose.Types.ObjectId.isValid(bookPlanId)) {
       return NextResponse.json({ error: "Invalid bookPlanId" }, { status: 400 });
